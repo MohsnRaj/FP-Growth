@@ -1,90 +1,202 @@
-export const calculateFrequentPatternsByMinSupport = (conditionalPatternBases: Map<string, string[]>, minSupportValue: number): string[] => {
-    let frequentPatterns: string[] = [];
-  
-    // Iterate through each entry in conditionalPatternBases
-    conditionalPatternBases.forEach((patterns: string[], item: string) => {
-      // Check if the number of patterns associated with the item meets the minimum support
-      console.log("Pattern",patterns);
-      
-      if (patterns.length >= minSupportValue) {
-        // If it meets the support, add this item to the frequent patterns
-        frequentPatterns.push(item);
+export const calculateFrequentPatternsByMinSupport = (
+  conditionalPatternBases: Map<string, string[]>,
+  minSupportValue: number
+): string[] => {
+  let frequentPatterns: string[] = [];
+
+  // Iterate through each entry in conditionalPatternBases
+  conditionalPatternBases.forEach((patterns: string[], item: string) => {
+    // Check if the number of patterns associated with the item meets the minimum support
+    if (patterns.length >= minSupportValue) {
+      // If it meets the support, add this item to the frequent patterns
+      frequentPatterns.push(item);
+    }
+  });
+
+  // Now, let's generate combinations of frequent itemsets of different sizes
+  frequentPatterns = generateItemsetCombinations(frequentPatterns);
+
+  return frequentPatterns;
+};
+
+// Function to generate combinations of frequent itemsets of different sizes
+const generateItemsetCombinations = (frequentItems: string[]): string[] => {
+  let frequentItemsets: string[] = [];
+
+  // Generate combinations of frequent itemsets of different sizes
+  const generateCombinations = (items: string[], prefix: string[]) => {
+    for (let i = 0; i < items.length; i++) {
+      const currentItem = items[i];
+      const newPrefix = [...prefix, currentItem];
+      frequentItemsets.push(newPrefix.join(","));
+
+      const remainingItems = items.slice(i + 1);
+      if (remainingItems.length > 0) {
+        generateCombinations(remainingItems, newPrefix);
       }
-    });
-  
-    return frequentPatterns;
+    }
   };
+
+  // Generate combinations for different sizes starting from 2
+  for (let i = 0; i < frequentItems.length; i++) {
+    generateCombinations(frequentItems.slice(i + 1), [frequentItems[i]]);
+  }
+
+  return frequentItemsets;
+};
+export const generateAssociationRules = (
+  frequentPatterns: string[],
+  data: string[][],
+  minSupport: number
+): string[] => {
+  const associationRules: string[] = [];
+
+  frequentPatterns.forEach((pattern) => {
+    const items = pattern.split(",");
+
+    // Generate rules for each item as the consequent
+    for (let i = 0; i < items.length; i++) {
+      const consequent = items[i];
+      const antecedent = items.filter((item, index) => index !== i).join(",");
+
+      const supportAntecedent = calculateSupport(antecedent.split(","), data);
+      const supportConsequent = calculateSupport(consequent.split(","), data);
+
+      if (supportAntecedent >= minSupport && supportConsequent >= minSupport) {
+        associationRules.push(
+          `<${antecedent},${consequent}:${Math.min(
+            supportAntecedent,
+            supportConsequent
+          )}>`
+        );
+      }
+    }
+  });
+
+  return associationRules;
+};
+
+export const pruneRedundantRules = (rules: string[]): string[] => {
+  const prunedRules: string[] = [];
+
+  rules.forEach((rule) => {
+    const [antecedent, consequent] = rule.split(" => ");
+    const reverseRule = `${consequent} => ${antecedent}`;
+
+    // Check if the reverse rule exists or not in the pruned rules array
+    if (!prunedRules.includes(reverseRule)) {
+      prunedRules.push(rule); // Add the rule if its reverse doesn't exist
+    }
+  });
+
+  return prunedRules;
+};
+
+// filter Associate Rules By Confidence
+export const filterRulesByConfidence = (
+  rules: string[],
+  minConfidence: number
+): string[] => {
+  const filteredRules: string[] = [];
+
+  rules.forEach((rule) => {
+    // Parse rule string to extract antecedent, consequent, and confidence
+    const [antecedent, consequent] = rule.split(" => ");
+    //   const confidence = calculateConfidence(antecedent, consequent); // Implement a function to calculate confidence
+
+    // Keep the rule if its confidence meets the minimum threshold
+    //   if (confidence >= minConfidence) {
+    //     filteredRules.push(rule);
+    //   }
+  });
+
+  return filteredRules;
+};
+// filter Rules By Support
+export const filterRulesBySupport = (rules: string[], minSupport: number, data: string[][]): string[] => {
+    const filteredRules: string[] = [];
   
+    const totalTransactions = data.length;
   
+    rules.forEach(rule => {
+      // Extract the antecedent, consequent, and support parts from the rule
+      const ruleParts = rule.match(/<(.+):(.+)>/);
+      if (ruleParts && ruleParts.length === 3) {
+        const antecedent = ruleParts[1];
+        const support = parseFloat(ruleParts[2]);
   
-  export const calculateFrequentPatternsByMinConfidence = (conditionalPatternBases: Map<string, string[]>, minConfidenceValue: number): string[] => {
-    let frequentPatterns: string[] = [];
+        // Calculate support for the antecedent itemset
+        const supportAntecedent = calculateSupport(antecedent.split(','), data);
   
-    // Iterate through each entry in conditionalPatternBases
-    conditionalPatternBases.forEach((patterns: string[], item: string) => {
-      // Count occurrences of the item's patterns in the dataset
-      let itemCount = 0;
-  
-      // Iterate through other items in the conditional pattern bases to find joint occurrences
-      conditionalPatternBases.forEach((otherPatterns: string[], otherItem: string) => {
-        if (otherItem !== item) {
-          // Check if the other item's patterns contain the current item's patterns
-          const intersection = patterns.filter(pattern => otherPatterns.includes(pattern));
-          const confidence = intersection.length / patterns.length;
-  
-          // If confidence meets the threshold, increment the count of occurrences
-          if (confidence >= minConfidenceValue) {
-            itemCount++;
-          }
+        // Check if the calculated support meets the minimum support threshold
+        if (supportAntecedent >= minSupport) {
+          filteredRules.push(rule);
         }
-      });
-  
-      // Check if the confidence meets the threshold for the item itself
-      const itemConfidence = itemCount / conditionalPatternBases.size;
-  
-      // If confidence meets the threshold, add this item to the frequent patterns
-      if (itemConfidence >= minConfidenceValue) {
-        frequentPatterns.push(item);
       }
+      // Handle incorrect rule format or exclude if needed
+      // For instance, you can log or skip rules without the expected format
     });
   
-    return frequentPatterns;
+    return filteredRules;
   };
   
   
-  export const calculateFrequentPatternsByNumPartition = (conditionalPatternBases: Map<string, string[]>, numPartitionValue: number): string[] => {
-    let frequentPatterns: string[] = [];
   
-    // Create a map to count partitions for each item
-    const partitionCounts: Map<string, number> = new Map();
-  
-    // Iterate through each pattern in conditionalPatternBases
-    conditionalPatternBases.forEach((patterns: string[], item: string) => {
-      // Initialize count for the current item
-      partitionCounts.set(item, 0);
-  
-      // Iterate through other items to count partitions
-      conditionalPatternBases.forEach((otherPatterns: string[], otherItem: string) => {
-        if (otherItem !== item) {
-          // Check if there's an intersection between patterns of current item and other items
-          const intersection = patterns.filter(pattern => otherPatterns.includes(pattern));
-  
-          // If there's an intersection, increment the partition count for the current item
-          if (intersection.length > 0) {
-            const count = partitionCounts.get(item) || 0;
-            partitionCounts.set(item, count + 1);
-          }
+
+const calculateSupport = (itemset: string[], data: string[][]): number => {
+  const supportCount = data.filter((transaction) =>
+    containsAllItems(transaction, itemset)
+  ).length;
+  return supportCount / data.length;
+};
+
+const containsAllItems = (
+  transaction: string[],
+  itemset: string[]
+): boolean => {
+  return itemset.every((item) => transaction.includes(item));
+};
+
+type Rule = string;
+function removeRedundantRules(rules: Rule[]): Rule[] {
+    const uniqueRules: { [key: string]: Rule } = {};
+
+    for (const rule of rules) {
+        const key = extractValues(rule).join(','); // Step 1: Extract values and join them
+        
+        const sortedKey = orderAlphabetically(key); // Step 2: Order alphabetically
+        
+        if (!uniqueRules.hasOwnProperty(sortedKey)) {
+            uniqueRules[sortedKey] = rule;
         }
-      });
-    });
+    }
+
+    return Object.values(uniqueRules);
+}
+
+function extractValues(str: string): string[] {
+    const matches = str.match(/<([^>:]+)/g);
   
-    // Check which items meet the specified number of partitions
-    partitionCounts.forEach((count, item) => {
-      if (count >= numPartitionValue) {
-        frequentPatterns.push(item);
-      }
-    });
+    if (matches) {
+        return matches.map(match => {
+            return match.substring(1);
+        });
+    }
   
-    return frequentPatterns;
-  };
+    return [];
+}
   
+function orderAlphabetically(str: string): string {
+    const arr = str.split(',').sort();
+    return arr.join(',');
+}
+
+// Example usage:
+const uniqueRules: Rule[] = [
+    '<K,E:0.8>', '<E,K:0.8>', '<K,O,E:0.6>', '<E,O,K:0.6>', '<E,K,O:0.6>',
+    '<O,E:0.6>', '<E,O:0.6>', '<M,K:0.6>', '<K,M:0.6>', '<O,K:0.6>',
+    '<K,O:0.6>', '<Y,K:0.6>', '<K,Y:0.6>'
+];
+
+const modifiedRules: Rule[] = removeRedundantRules(uniqueRules);
+console.log(modifiedRules);
