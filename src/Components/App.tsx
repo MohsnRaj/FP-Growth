@@ -1,22 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import FileUploadComponent from "./FileUploadComponent";
 import UserInputComponent from "./UserInputComponent";
-import FPComponent from "./FPComponent";
 import FPTree from "./FP-Tree/FPTree";
 
 const FP_GrowthComponent: React.FC = () => {
-  const [minSupport, setMinSupport] = useState<number>(0);
-  const [minConfidence, setMinConfidence] = useState<number>(0);
-  const [numPartitions, setNumPartitions] = useState<number>(0);
+  
   const [SelectedOption, setselectedOption] = useState<string>();
   const [uploadedData, setUploadedData] = useState<string[][]>([]);
 
-  useEffect(() => {
-    if (uploadedData.length > 0) {
-      console.log(uploadedData);
-      console.log(uploadedData[0][4]);
-    }
-  }, [uploadedData]);
+  
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>

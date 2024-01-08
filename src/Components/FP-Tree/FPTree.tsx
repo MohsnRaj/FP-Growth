@@ -3,7 +3,7 @@ import {
   calculateFrequentPatternsByMinSupport,
   filterRulesBySupport,
   generateAssociationRules,
-//   removeRedundantRules,
+  removeRedundantRules,
 } from "./CalculateFP";
 interface FileUploadProps {
   data: string[][];
@@ -66,35 +66,29 @@ const FPTree: React.FC<FileUploadProps> = ({ data, selectedOption }) => {
 
   useEffect(() => {
     // Function to simulate scanning and building FP-Tree
-    const scanAndBuildTree = () => {
-      // Loop through each transaction
-      data.forEach((transaction) => {
-        // Sort transaction items by their support count order
-        const sortedTransaction = transaction.slice().sort((a, b) => {
-          return (itemSupport.get(b) || 0) - (itemSupport.get(a) || 0);
-        });
+    // const scanAndBuildTree = () => {
+    //   // Loop through each transaction
+    //   data.forEach((transaction) => {
+    //     // Sort transaction items by their support count order
+    //     const sortedTransaction = transaction.slice().sort((a, b) => {
+    //       return (itemSupport.get(b) || 0) - (itemSupport.get(a) || 0);
+    //     });
 
-        // Simulate traversing the FP-Tree (without building the actual tree structure)
-        sortedTransaction.forEach((item) => {
-          // Simulate processing each item in the transaction
-          // Here, you can perform operations related to updating the FP-Tree or header table
-          // For example, incrementing counts or creating new nodes
-          if (headerTable.has(item)) {
-            const linkedNodes = headerTable.get(item)!;
-            // console.log(`Item: ${item}, Linked Nodes: ${linkedNodes.join(', ')}`);
-            // Simulate incrementing count or creating new nodes in the FP-Tree
-            // Update the header table if needed
-          } else {
-            // console.log(`Item: ${item}, No Linked Nodes`);
-            // Simulate creating a new node in the FP-Tree
-            // Update the header table if needed
-          }
-        });
-      });
-    };
+    //     // Simulate traversing the FP-Tree (without building the actual tree structure)
+    //     sortedTransaction.forEach((item) => {
+    //       // Simulate processing each item in the transaction
+          
+    //       if (headerTable.has(item)) {
+    //         const linkedNodes = headerTable.get(item)!;
+    //         // console.log(`Item: ${item}, Linked Nodes: ${linkedNodes.join(', ')}`);
+           
+    //       } 
+    //     });
+    //   });
+    // };
 
-    // Call the function to simulate scanning and building the FP-Tree when the component mounts
-    scanAndBuildTree();
+    // // Call the function to simulate scanning and building the FP-Tree when the component mounts
+    // scanAndBuildTree();
   }, [data, itemSupport, headerTable]);
 
   // Function to generate conditional pattern bases for each item
@@ -167,21 +161,16 @@ const FPTree: React.FC<FileUploadProps> = ({ data, selectedOption }) => {
         data,
         0.6
       );
-      console.log("associationRules Rules:", associationRules);
+      // console.log("associationRules Rules:", associationRules);
       // Handle the generated association rules
       // You can set the generated association rules to state or use them accordingly
       if (associationRules) {
-        switch (selectedOption) {
-          case "Support":
-            type Rule = string;
-            const Support = filterRulesBySupport(associationRules, 0.6, data);
-            // const uniqueOutputRules: Rule[] = removeRedundantRules(Support);
-            // console.log(uniqueOutputRules);
-            break;
+        
+            type Rule = string
+            const Support = filterRulesBySupport(associationRules, 3, data)
+            const modifiedRules: Rule[] = removeRedundantRules(Support)
+            console.log(modifiedRules);
 
-          default:
-            break;
-        }
       }
     }
   }, [conditionalPatternBases, selectedOption]);

@@ -21,7 +21,7 @@ export const calculateFrequentPatternsByMinSupport = (
 
 // Function to generate combinations of frequent itemsets of different sizes
 const generateItemsetCombinations = (frequentItems: string[]): string[] => {
-  let frequentItemsets: string[] = [];
+  const frequentItemsets: string[] = [];
 
   // Generate combinations of frequent itemsets of different sizes
   const generateCombinations = (items: string[], prefix: string[]) => {
@@ -76,54 +76,18 @@ export const generateAssociationRules = (
   return associationRules;
 };
 
-export const pruneRedundantRules = (rules: string[]): string[] => {
-  const prunedRules: string[] = [];
-
-  rules.forEach((rule) => {
-    const [antecedent, consequent] = rule.split(" => ");
-    const reverseRule = `${consequent} => ${antecedent}`;
-
-    // Check if the reverse rule exists or not in the pruned rules array
-    if (!prunedRules.includes(reverseRule)) {
-      prunedRules.push(rule); // Add the rule if its reverse doesn't exist
-    }
-  });
-
-  return prunedRules;
-};
-
-// filter Associate Rules By Confidence
-export const filterRulesByConfidence = (
-  rules: string[],
-  minConfidence: number
-): string[] => {
-  const filteredRules: string[] = [];
-
-  rules.forEach((rule) => {
-    // Parse rule string to extract antecedent, consequent, and confidence
-    const [antecedent, consequent] = rule.split(" => ");
-    //   const confidence = calculateConfidence(antecedent, consequent); // Implement a function to calculate confidence
-
-    // Keep the rule if its confidence meets the minimum threshold
-    //   if (confidence >= minConfidence) {
-    //     filteredRules.push(rule);
-    //   }
-  });
-
-  return filteredRules;
-};
 // filter Rules By Support
 export const filterRulesBySupport = (rules: string[], minSupport: number, data: string[][]): string[] => {
     const filteredRules: string[] = [];
   
-    const totalTransactions = data.length;
+    // const totalTransactions = data.length;
   
     rules.forEach(rule => {
       // Extract the antecedent, consequent, and support parts from the rule
       const ruleParts = rule.match(/<(.+):(.+)>/);
       if (ruleParts && ruleParts.length === 3) {
         const antecedent = ruleParts[1];
-        const support = parseFloat(ruleParts[2]);
+        // const support = parseFloat(ruleParts[2]);
   
         // Calculate support for the antecedent itemset
         const supportAntecedent = calculateSupport(antecedent.split(','), data);
@@ -139,15 +103,12 @@ export const filterRulesBySupport = (rules: string[], minSupport: number, data: 
   
     return filteredRules;
   };
-  
-  
-  
-
 const calculateSupport = (itemset: string[], data: string[][]): number => {
   const supportCount = data.filter((transaction) =>
     containsAllItems(transaction, itemset)
   ).length;
-  return supportCount / data.length;
+  // return supportCount / data.length;
+  return supportCount;
 };
 
 const containsAllItems = (
@@ -158,7 +119,7 @@ const containsAllItems = (
 };
 
 type Rule = string;
-function removeRedundantRules(rules: Rule[]): Rule[] {
+export function removeRedundantRules(rules: Rule[]): Rule[] {
     const uniqueRules: { [key: string]: Rule } = {};
 
     for (const rule of rules) {
@@ -185,18 +146,8 @@ function extractValues(str: string): string[] {
   
     return [];
 }
-  
 function orderAlphabetically(str: string): string {
     const arr = str.split(',').sort();
     return arr.join(',');
 }
 
-// Example usage:
-const uniqueRules: Rule[] = [
-    '<K,E:0.8>', '<E,K:0.8>', '<K,O,E:0.6>', '<E,O,K:0.6>', '<E,K,O:0.6>',
-    '<O,E:0.6>', '<E,O:0.6>', '<M,K:0.6>', '<K,M:0.6>', '<O,K:0.6>',
-    '<K,O:0.6>', '<Y,K:0.6>', '<K,Y:0.6>'
-];
-
-const modifiedRules: Rule[] = removeRedundantRules(uniqueRules);
-console.log(modifiedRules);
