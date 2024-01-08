@@ -1,38 +1,30 @@
-import React, { ChangeEvent, useState } from 'react';
-
+import React, { useEffect, useState } from "react";
 interface FileUploadProps {
-  onFileUpload: (data: string[][]) => void;
+  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  uploadedData: string[][];
 }
-
-const FileUploadComponent: React.FC<FileUploadProps> = ({ onFileUpload }) => {
-  const [fileContent, setFileContent] = useState<string>('');
-
-  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target) {
-          const content = e.target.result as string;
-          setFileContent(content);
-          parseContent(content);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const parseContent = (content: string) => {
-    // Assuming the content is properly formatted as described in your example
-    const lines = content.split('\n').map((line) => line.trim());
-    const parsedDataset = lines.map((line) => JSON.parse(line.replace('dataset = ', '')));
-    onFileUpload(parsedDataset);
-  };
+const FileUploadComponent: React.FC<FileUploadProps> = ({ handleFileUpload, uploadedData }) => {
 
   return (
     <div>
-      <input type="file" accept=".txt" onChange={handleFileUpload} />
-      {fileContent && <p>File uploaded successfully!</p>}
+      <input type="file" onChange={handleFileUpload} />
+      <div>
+        {/* Display uploaded data */}
+        {uploadedData.length > 0 && (
+          <div>
+            <h2>Uploaded Data:</h2>
+            <ul>
+              {uploadedData.map((row, rowIndex) => (
+                <li key={rowIndex}>
+                  {row.map((item, itemIndex) => ( 
+                  item &&  <span key={itemIndex}>{item} , </span>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

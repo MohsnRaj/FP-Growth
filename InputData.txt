@@ -1,0 +1,7 @@
+dataset = [
+[E,K,M,N,O,Y],
+[D,E,K,N,O,Y],
+[A,E,K,M],
+[C,K,M,U,Y],
+[C,E,I,K,O,O]
+]
