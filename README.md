@@ -13,3 +13,9 @@ freqItemsets: frequent itemsets in the format of DataFrame(“items”[Array], �
 associationRules: association rules generated with confidence above minConfidence, in the format of DataFrame(“antecedent”[Array], “consequent”[Array], “confidence”[Double]).
 transform: For each transaction in itemsCol, the transform method will compare its items against the antecedents of each association rule. If the record contains all the antecedents of a specific association rule, the rule will be considered as applicable and its consequents will be added to the prediction result. The transform method will summarize the consequents from all the applicable rules as prediction. The prediction column has the same data type as itemsCol and does not contain existing items in the itemsCol.
 # How To Use this App ?
+it's very Easy To use :
+ 1- you should Upload your Datalist (the Acceptable Datalist is exist in Root )
+ 2- write the Support Number and it's Done!! (:
+ you can see immediately the FPs of Your Data
+
+ Hope You Enjoy!! I'm Masir and Glad to see you here hope it's been Useful
