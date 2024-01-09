@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   calculateFrequentPatternsByMinSupport,
   filterRulesBySupport,
@@ -7,13 +7,14 @@ import {
 } from "./CalculateFP";
 interface FileUploadProps {
   data: string[][];
-  selectedOption: string;
+  Supportvalue: number;
 }
 
-const FPTree: React.FC<FileUploadProps> = ({ data, selectedOption }) => {
+const FPTree: React.FC<FileUploadProps> = ({ data, Supportvalue }) => {
   const [itemSupport, setItemSupport] = useState<Map<string, number>>(
     new Map()
   );
+  // const [Output, setOutPut] = useState<string[]>([]);
   const [headerTable, setHeaderTable] = useState<Map<string, string[]>>(
     new Map()
   );
@@ -73,20 +74,16 @@ const FPTree: React.FC<FileUploadProps> = ({ data, selectedOption }) => {
     //     const sortedTransaction = transaction.slice().sort((a, b) => {
     //       return (itemSupport.get(b) || 0) - (itemSupport.get(a) || 0);
     //     });
-
     //     // Simulate traversing the FP-Tree (without building the actual tree structure)
     //     sortedTransaction.forEach((item) => {
     //       // Simulate processing each item in the transaction
-          
     //       if (headerTable.has(item)) {
     //         const linkedNodes = headerTable.get(item)!;
     //         // console.log(`Item: ${item}, Linked Nodes: ${linkedNodes.join(', ')}`);
-           
-    //       } 
+    //       }
     //     });
     //   });
     // };
-
     // // Call the function to simulate scanning and building the FP-Tree when the component mounts
     // scanAndBuildTree();
   }, [data, itemSupport, headerTable]);
@@ -125,68 +122,72 @@ const FPTree: React.FC<FileUploadProps> = ({ data, selectedOption }) => {
 
   // Generate conditional pattern bases
   const conditionalPatternBases = generateConditionalPatternBases();
-  const generateFrequentPatterns = (selectedOption: string) => {
-    // Ensure selectedOption has a value
-    if (!selectedOption) {
-      console.error("Please select an option."); // Handle error or prompt user to select an option
+  const generateFrequentPatterns = (Supportvalue: number) => {
+    // Ensure Supportvalue has a value
+    if (!Supportvalue) {
+      console.error("Please input Supportvalue."); // Handle error or prompt user to select an option
       return [];
     }
 
     let frequentPatterns: string[] = [];
 
-    // Implement logic based on the selected
-
     frequentPatterns = calculateFrequentPatternsByMinSupport(
       conditionalPatternBases,
-      3
+      Supportvalue
     );
 
     return frequentPatterns;
   };
 
-  useEffect(() => {
-    if (conditionalPatternBases) {
-      // console.log(conditionalPatternBases);
-      // console.log("selectedOption",selectedOption);
+  const Support = useMemo(() => {
+    if (!conditionalPatternBases) return []; // Return default value if conditionalPatternBases is not available
 
-      const frequentPatterns = generateFrequentPatterns(selectedOption);
-      // Handle the generated frequent patterns, e.g., display or further processing
-      //   console.log('Generated frequent patterns:', frequentPatterns);
+    // Generate frequent patterns from conditionalPatternBases
+    const frequentPatterns = generateFrequentPatterns(Supportvalue);
 
-      // You can set the generated patterns to state or use them accordingly
+    // Generate association rules from frequent patterns
+    const associationRules = generateAssociationRules(
+      frequentPatterns,
+      data,
+      Supportvalue
+    );
 
-      // Generate association rules from the frequent patterns
-      const associationRules = generateAssociationRules(
-        frequentPatterns,
-        data,
-        0.6
-      );
-      // console.log("associationRules Rules:", associationRules);
-      // Handle the generated association rules
-      // You can set the generated association rules to state or use them accordingly
-      if (associationRules) {
-        
-            type Rule = string
-            const Support = filterRulesBySupport(associationRules, 3, data)
-            const modifiedRules: Rule[] = removeRedundantRules(Support)
-            console.log(modifiedRules);
+    // Filter association rules by support
+    const filteredRules = filterRulesBySupport(
+      associationRules,
+      Supportvalue,
+      data
+    );
 
-      }
-    }
-  }, [conditionalPatternBases, selectedOption]);
+    // Remove redundant rules
+    return removeRedundantRules(filteredRules);
+  }, [conditionalPatternBases, Supportvalue, data]);
 
   return (
-    <div>
-      <h2>Conditional Pattern Bases</h2>
-      <ul>
-        {Array.from(conditionalPatternBases.entries()).map(
-          ([item, patternBase]) => (
-            <li key={item}>
-              Item: {item}, Conditional Pattern Base: {patternBase.join(" | ")}
-            </li>
-          )
-        )}
-      </ul>
+    <div style={{ display: "flex", gap: "1rem" }}>
+      <div className="">
+        <h2>Conditional Pattern Bases</h2>
+        <ul>
+          {Array.from(conditionalPatternBases.entries()).map(
+            ([item, patternBase]) => (
+              <li key={item}>
+                Item: {item}, Conditional Pattern Base:{" "}
+                {patternBase.join(" | ")}
+              </li>
+            )
+          )}
+        </ul>
+      </div>
+      {Support.length > 0 && (
+        <>
+          <h2>FP : </h2>
+          <ul>
+            {Support.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 };

@@ -1,25 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 interface UserInputProps {
-  onUserInput: (selectedOption: string) => void;
+  onUserInput: (selectedOption: number) => void;
 }
 
 const UserInputComponent: React.FC<UserInputProps> = ({ onUserInput }) => {
-  const [selectedOption, setSelectedOption] = useState<string>('');
 
   const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedOption(e.target.value);
-    onUserInput(e.target.value); // Pass the selected option to the parent component
+    // console.log(e.target.value);
+    
+    onUserInput(parseInt(e.target.value)); // Pass the selected option to the parent component
   };
 
   return (
     <div>
-      <label>Select an Option:</label>
-      <select value={selectedOption} onChange={handleOptionChange}>
-        <option value="">Select an option</option>
-        <option value="Support">Support</option>
-        <option value="Confidence">Confidence</option>
-      </select>
+      <label>input the Suppport Number:</label>
+     <input type="number" name="" id="" onChange={(e)=>handleOptionChange(e)} />
     </div>
   );
 };

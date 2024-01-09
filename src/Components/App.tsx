@@ -5,7 +5,7 @@ import FPTree from "./FP-Tree/FPTree";
 
 const FP_GrowthComponent: React.FC = () => {
   
-  const [SelectedOption, setselectedOption] = useState<string>();
+  const [Supportvalue, setSupportValue] = useState<number>();
   const [uploadedData, setUploadedData] = useState<string[][]>([]);
 
   
@@ -65,8 +65,8 @@ const FP_GrowthComponent: React.FC = () => {
     });
   };
 
-  const handleUserInput = (selectedOption: string) => {
-    setselectedOption(selectedOption);
+  const handleUserInput = (Supportvalue: number) => {
+    setSupportValue(Supportvalue);
   };
 
   return (
@@ -79,10 +79,10 @@ const FP_GrowthComponent: React.FC = () => {
       {uploadedData.length > 0 && (
         <UserInputComponent onUserInput={handleUserInput} />
       )}
-      {SelectedOption && (
+      {Supportvalue && (
        <FPTree
        data={uploadedData}
-       selectedOption={SelectedOption}
+       Supportvalue={Supportvalue}
        />
       )}
     </div>
