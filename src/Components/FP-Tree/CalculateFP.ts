@@ -13,7 +13,7 @@ export const calculateFrequentPatternsByMinSupport = (
     }
   });
 
-  // Now, let's generate combinations of frequent itemsets of different sizes
+  // generate combinations of frequent itemsets of different sizes
   frequentPatterns = generateItemsetCombinations(frequentPatterns);
 
   return frequentPatterns;
@@ -97,8 +97,7 @@ export const filterRulesBySupport = (rules: string[], minSupport: number, data: 
           filteredRules.push(rule);
         }
       }
-      // Handle incorrect rule format or exclude if needed
-      // For instance, you can log or skip rules without the expected format
+     
     });
   
     return filteredRules;
